@@ -1,0 +1,30 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/signup.css' %}">     
+{% endblock %}
+
+{% block contents %}
+<section id="container">
+
+    <div id="signup_section">
+        <h1 class="logo"><a href="#" class="icon--main-logo"></a>회원가입</h1>
+        <form action="" method="post" enctype="multipart/form-data">
+
+            {% csrf_token %}
+            {{ form.as_p }}
+
+            <div class="signup_section">
+                <input type="submit" value="SIGN UP" id="submitBtn">    
+            </div>
+        </form>    
+    </div>
+
+</section>
+{% endblock  %}
+
+{% block js %}
+    
+{% endblock  %}
+    

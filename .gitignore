@@ -139,3 +139,7 @@ cython_debug/
 
 # Mac
 .DS_Store
+
+# MEDIA
+accounts/picture
+config/static

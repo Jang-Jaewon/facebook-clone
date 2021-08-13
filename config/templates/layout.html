@@ -1,0 +1,28 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <link rel="stylesheet" href="{% static 'css/reset.css' %}">    
+    <link rel="stylesheet" href="{% static 'css/common.css' %}">    
+    {% block head %}
+        
+    {% endblock %}
+        
+</head>
+<body>
+    
+    {% block contents %}
+        
+    {% endblock %}
+
+    
+
+    
+    {% block js %}
+        
+    {% endblock %}
+        
+</body>
+</html>

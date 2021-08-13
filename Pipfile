@@ -6,6 +6,9 @@ name = "pypi"
 [packages]
 django = "==3.0.4"
 django-dotenv = "*"
+django-allauth = "*"
+django-imagekit = "*"
+pillow = "*"
 
 [dev-packages]
 
