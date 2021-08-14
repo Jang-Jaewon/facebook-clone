@@ -1,0 +1,178 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/main.css' %}">
+{% endblock %}
+
+
+{% block content %}
+<div id="wrapper">
+    <div class="inner">
+        <div class="left_box">
+            {% if user_profile %}
+            <div class="my_name">
+                <div class="profile_img"><img src="{{ user_profile.picture.url }}" alt=""></div>
+                <span class="name">{{ user_profile.nickname }}</span>
+                <span class="icon--more"></span>
+            </div>
+            <ul class="list">
+                <li class="active"><a href="{% url 'post:post_list' %}"><span class="icon icon--news"></span>뉴스피드<span class="icon--more"></span></a></li>
+                <li><a href="#"><span class="icon icon--messenger"></span>Messenger <span class="icon--more"></span></a></li>
+                <li><a href="#"><span class="icon icon--save"></span>저장됨 <span class="icon--more"></span></a></li>
+            </ul>
+            {% else %}
+            <div class="my_name">
+                <div class="profile_img"><img src="{% static 'imgs/noun_User.png' %}" alt=""></div>
+                <span class="name">로그인해주세요</span>
+                <span class="icon--more"></span>
+            </div>    
+            <ul class="list">
+                <li class="active"><a href="{% url 'post:post_list' %}"><span class="icon icon--news"></span>뉴스피드<span class="icon--more"></span></a></li>
+                <li><a href="#"><span class="icon icon--messenger"></span>Messenger <span class="icon--more"></span></a></li>
+                <li><a href="#"><span class="icon icon--save"></span>저장됨 <span class="icon--more"></span></a></li>
+            </ul>
+            {% endif %}
+        </div>
+
+        <section id="contents_container">
+            <article class="create_box">
+                <h2 class="title">게시물 만들기</h2>
+                <div class="text_field">
+                    <form id="form_new_post">
+                        <input type='hidden' id='csrfmiddlewaretoken' name='csrfmiddlewaretoken' value='{{ csrf_token }}' />
+                        <div class="top">
+                            <div class="profile_img"><img src="{{ user_profile.picture.url }}" alt=""></div>
+                            <p>
+                                <textarea name="content" id="text_field" cols="50" rows="5" data-name="add" placeholder="{{ user_profile.nickname}}님, 무슨 생각을 하고 계신가요?"></textarea>
+                            </p>
+                        </div>
+                        <div class="middle">
+                            <canvas id="imgeCanvas" width="0" height="0"></canvas>
+                        </div>
+                        <div class="bottom">
+                            <input type="file" name="photo" id="id_photo" required>
+
+                            <div class="import-btn">
+                                <label for="id_photo" id="photo_label"><span class="icon icon--picture"></span>사진/동영상</label>
+                            </div>
+                        </div>
+                        <div class="submit">
+                            <input type="button" id="submitBtn" value="게시" disabled>
+                        </div>
+                    </form>        
+                </div>
+            </article>
+            <div class="contents_wrapper">
+                {% for post in posts %}
+                    <article class="contents">
+                        <header>
+                            <div class="porfile_container">
+                                <div class="profile_img"><img src="{{post.author.profile.picture.url}}" alt=""></div>
+                            </div>
+                            <div>
+                                <div class="name">{{post.author.profile.nickname}}</div>
+                                <div class="time">{{post.updated_at|timesince}}</div>
+                            </div>
+                            <div class="more" data-name="more">
+                                <span class="icon--more"></span>
+                                <ul class="hidden_menu"></ul>
+                            </div>
+                        </header>
+                        <div class="main_article">
+                            {{post.content}}
+                        </div>
+                        <div class="img_section"><img src="{{post.photo.url}}" alt=""></div>
+                        <div class="ajax_field">
+                            <div class="like">좋아요<span class="like_count" id="like-count-{{post.id}}">1</span>개</div>
+                            <div class="comment">댓글<span class="comment_count" id="comment_count-{{post.id}}">1</span>개</div>
+                        </div>
+                        <div class="btn_container">
+                            <div class="like-btn active" name="{{ post.id }}" data-name="heartbeat"><span class="icon icon--like-line"></span>좋아요</div>
+                            <div class="comment-btn"><span class="icon icon--cooment-line"></span>댓글</div>
+                        </div>
+                        <div class="comment_container">
+                            <div class="comment" id="comment-list-ajax-post{{ post.id }}">
+                                <div class="comment-detail" id="comment{{ comment.id }}">
+                                    <div class="id">
+                                        <div class="profile_img"><img src="{% static 'imgs/noun_User.png' %}" alt=""></div>
+                                        <div class="text_field">안녕하세요</div>
+                                        <div class="time">3시간전</div>
+                                        <input type="button" class="delete" data-name="comment_delete" value="X" name="{{ comment.id }}">                         
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="comment_input" id="add_comment-post{{post.id}}">
+                            {% if user.is_authenticated %}
+                                <div class="profile_img"><img src="{{ user_profile.picture.url }}" alt=""></div>
+                                <div class="input_container">
+                                    {{ comment_form }}
+                                    <button class="send">
+                                        <span class="icon--send" name="{{ post.id }}" data-name="comment"></span>
+                                    </button>
+                                </div>
+
+                            {% else %}
+                              <div class="profile_img"><img src="{% static 'imgs/noun_User.png' %}" alt=""></div>
+                                <div class="input_container">
+                                    {{ comment_form }}
+                                    <button class="send">
+                                        <span class="icon--send" name="{{ post.id }}" data-name="comment" onclick="alert('댓글을 작성하려면 로그인이 필요합니다')"></span>
+                                    </button>
+                                </div>
+                            {% endif %}                            
+                        </div>
+                    </article>
+                {% endfor %}
+
+                <div id="post_list_ajax"></div>
+                <input type="hidden" id="page" value="2">
+
+            </div>
+
+
+        </section>
+        <div class="right_box">
+            <header class="title">내 프로필</header>
+
+            {% if user_profile %}
+            <div class="right_profile">
+                <div class="profile_img"><img src="{{ user_profile.user.profile.picture.url }}" alt=""></div>
+                <div class="detail">
+                    <div class="name"><a href="#">{{ user_profile.user.profile.nickname }}</a></div>
+                    <div class="message"><span class="icon icon--write-gray"></span>상태 메시지</div>
+                </div>
+            </div>
+            {% else %}
+            <div class="right_profile">
+                <div class="profile_img"><img src="{% static 'imgs/noun_User.png' %}" alt=""></div>
+                <div class="detail">
+                    <div class="name"><a href="#">로그인해주세요</a></div>
+                    <div class="message"><span class="icon icon--write-gray"></span>상태 메시지</div>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+
+    </div>
+</div>
+<div id="side_box">
+    <ul>
+        <li>
+            <div class="profile_img"><img src="{% static 'imgs/noun_User.png' %}" alt=""></div>
+            <div class="name">help chat</div>
+            <div class="light"></div>
+        </li>
+    </ul>
+</div>
+{% endblock  %}
+
+
+{% block js %}
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="{% static 'js/main.js' %}"></script>
+    <script src="{% static 'js/new_post.js' %}"></script>
+{% endblock  %}
+    
