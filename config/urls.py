@@ -9,6 +9,10 @@ urlpatterns = [
     path("accounts/", include("accounts.urls", namespace="accounts")),
     path("post/", include("post.urls", namespace="post")),
     path("", lambda r: redirect("post:post_list"), name="root"),
+    path(
+        "bookmark_friends/",
+        include("bookmark_friends.urls", namespace="bookmark_friends"),
+    ),
 ]
 
 

@@ -19,7 +19,7 @@
             <ul class="list">
                 <li class="active"><a href="{% url 'post:post_list' %}"><span class="icon icon--news"></span>뉴스피드<span class="icon--more"></span></a></li>
                 <li><a href="#"><span class="icon icon--messenger"></span>Messenger <span class="icon--more"></span></a></li>
-                <li><a href="#"><span class="icon icon--save"></span>저장됨 <span class="icon--more"></span></a></li>
+                <li><a href="{% url 'bookmark_friends:bookmark_friends_list' %}"><span class="icon icon--save"></span>저장됨 <span class="icon--more"></span></a></li>
             </ul>
             {% else %}
             <div class="my_name">
@@ -67,16 +67,22 @@
                 {% for post in posts %}
                     <article class="contents">
                         <header>
-                            <div class="porfile_container">
-                                <div class="profile_img"><img src="{{post.author.profile.picture.url}}" alt=""></div>
-                            </div>
-                            <div>
-                                <div class="name">{{post.author.profile.nickname}}</div>
-                                <div class="time">{{post.updated_at|timesince}}</div>
-                            </div>
-                            <div class="more" data-name="more">
-                                <span class="icon--more"></span>
-                                <ul class="hidden_menu"></ul>
+                            <div class="profile_container">
+                                <div class="profile_img"><img src="{{ post.author.profile.picture.url }}" alt=""></div>
+                                <div>
+                                    <div class="name">{{ post.author.profile.nickname }}</div>
+                                    <div class="time">{{ post.updated_at|timesince }}</div>
+                                </div>
+                                <div class="more" data-name="more">
+                                    <span class="icon--more"></span>
+                                    <ul class="hidden_menu">
+                                    {% if user in post.bookmark_user_set.all %}
+                                        <li class="bookmark" data-name="bookmark" name="{{ post.id }}">저장됨</li>
+                                    {% else %}
+                                        <li class="bookmark" data-name="bookmark" name="{{ post.id }}">저장하기</li>
+                                    {% endif %}
+                                    </ul>
+                                </div>
                             </div>
                         </header>
                         <div class="main_article">
@@ -84,11 +90,15 @@
                         </div>
                         <div class="img_section"><img src="{{post.photo.url}}" alt=""></div>
                         <div class="ajax_field">
-                            <div class="like">좋아요<span class="like_count" id="like-count-{{post.id}}">1</span>개</div>
+                            <div class="like">좋아요<span class="like_count" id="like-count-{{post.id}}">{{post.like_count}}</span>개</div>
                             <div class="comment">댓글<span class="comment_count" id="comment_count-{{post.id}}">1</span>개</div>
                         </div>
                         <div class="btn_container">
+                        {% if user in post.like_user_set.all %}
                             <div class="like-btn active" name="{{ post.id }}" data-name="heartbeat"><span class="icon icon--like-line"></span>좋아요</div>
+                        {% else %}
+                            <div class="like-btn" name="{{ post.id }}" data-name="heartbeat"><span class="icon icon--like-line"></span>좋아요</div>
+                        {% endif %}
                             <div class="comment-btn"><span class="icon icon--cooment-line"></span>댓글</div>
                         </div>
                         <div class="comment_container">
@@ -167,6 +177,7 @@
         </li>
     </ul>
 </div>
+{% include 'post/script_ajax.html' %}
 {% endblock  %}
 
 

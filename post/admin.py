@@ -10,3 +10,15 @@ class PostAdmin(admin.ModelAdmin):
     def nickname(request, post):
         # print(post) # Post object (1)
         return post.author.profile.nickname
+
+
+@admin.register(Like)
+class LikeAdmin(admin.ModelAdmin):
+    list_display = ["id", "post", "user", "created_at"]
+    list_display_links = ["post", "user"]
+
+
+@admin.register(Bookmark)
+class BookmarkAdmin(admin.ModelAdmin):
+    list_display = ["id", "post", "user", "created_at"]
+    list_display_links = ["post", "user"]

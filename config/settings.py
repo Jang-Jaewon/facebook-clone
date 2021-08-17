@@ -43,6 +43,7 @@ DJANGO_APPS = [
 PROJECT_APPS = [
     "accounts",
     "post",
+    "bookmark_friends",
 ]
 
 THIRD_PARTY_APPS = [

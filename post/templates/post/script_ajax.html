@@ -1,0 +1,66 @@
+<script type="text/javascript">
+    (function(){ // 👈 익명 함수
+        const delegation = document.querySelector('#contents_container');
+        const textField = document.querySelector('#text_field');
+
+        function delegationFunc(e) {
+        let elem = e.target; // 👈 click 위치
+        
+        while (!elem.getAttribute('data-name')){ // elem이 "data-name"을 포함하고 있으면 아래 반복
+            elem = elem.parentNode;  // 부모 node를 계속 찾아올라감
+
+            if (elem.nodeName === 'BODY'){ // elem이 'BODY' 태그를 만다면,
+
+                elem = null;
+                return; // 종료
+            }
+        }
+        // Like Btn Ajax 통신
+        if (elem.matches('[data-name="heartbeat"]')){ // 👈 elem의 내용 중에 [data-name="heartbeat"]이 있다면,,
+            const pk = elem.getAttribute('name'); // 👈 게시글의 id값을 가져옵니다. = post.pk 
+            // ajax 통신 방법
+            $.ajax({
+                type: "POST", // 👈 POST 방식
+                url: "{% url 'post:post_like' %}", // 👈 url 경로
+                data: {'pk': pk, 'csrfmiddlewaretoken': '{{ csrf_token }}'}, // 👈 pk값과, csrf_token 전달
+                dataType: "json", // // 👈 json 방식 선택
+                success: function (response){  // 👈 성공햇을 때,,
+                    const likeCount = document.querySelector('#like-count-'+pk); // 좋아요 갯수를 count하는 부분을 추출한 뒤,
+                    likeCount.innerHTML = response.like_count; // like_count를 html에 넣어줍니다.
+                },
+                error: function (request, status, error){  // 👈 실패했을 때,,
+                    console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+                }
+            });
+        }
+        // Bookmark Btn Ajax 통신
+        if (elem.matches('[data-name="bookmark"]')){ // data-name이 "bookmark"라면,
+            // console.log('북마크');
+            const pk = elem.getAttribute('name'); // 해당 요소에서 name값을 가져옴
+            // console.log(pk);
+            $.ajax({
+                type: "POST",
+                url: "{% url 'post:post_bookmark' %}",
+                data: {'pk': pk, 'csrfmiddlewaretoken': '{{ csrf_token }}' },
+                dataType: "json",
+                success: function (response){ // 성공햇을 때, response 값을 돌려 받고
+                    // 템플릿 Text 변경
+                    let btn_bookmark_text = ""; // 빈칸인 상수 생성
+                    if(response.is_bookmarked === 'N'){
+                        btn_bookmark_text = "저장하기";
+                    } else if (response.is_bookmarked === 'Y') {
+                        btn_bookmark_text = "저장됨";
+                    }
+                    const bookmark = document.querySelector('.bookmark').innerHTML = btn_bookmark_text;
+                },
+                error: function (reqeust, status, error){ // 실패했을 때, reqeust, status, errorr 값을 받음
+                    console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+                }
+            })
+        }
+        elem.classList.toggle('active');
+    }
+
+    delegation.addEventListener('click', delegationFunc); // 👈 '#contents_container'가 클릭됬을 때, delegationFunc실행
+})();
+</script> 

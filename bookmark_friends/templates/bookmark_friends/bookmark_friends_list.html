@@ -1,0 +1,51 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block head %}
+<link rel="stylesheet" href="{% static 'css/save.css' %}">
+{% endblock %}
+
+{% block content %}
+<div id="wrapper">
+    <div class="inner">
+        <div class="left_box">
+            <div class="my_name">
+                <div><span class="icon icon--save"></span><span clss="icon--more"></span></div>
+                <span class="name">저장됨 & 친구목록</span>
+                <span class="icon--more"></span>
+            </div>
+            <ul class="list">
+                <li class="active"><a href="#" data-name="save"><span class="icon icon--save"></span>저장됨<span class="icon--more"></span></a></li>
+                <li><a href="#" data-name="friends"><span class="icon icon--messenger"></span>친구목록<span class="icon--more"></span></a></li>
+            </ul>
+        </div>
+
+        <section id="contents_container">
+            <div id="save">
+                {% for post in post_list %}
+                    {% for bookmark_user in post.bookmark_user_set.all %}    
+                        {% if user == bookmark_user.profile.user %}
+                            <article class="contents">
+                                <div class="thumbnail"><img src="{{ post.photo.url }}" alt=""></div>
+                                <div>
+                                    <h1 class="heading">{{ post.author.username }}님의 글입니다 </h1>
+                                    <p class="description">
+                                        {{ post.content }}
+                                    </p>
+                                </div>
+                            </article>            
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+</div>
+
+<div id="side_box"></div>
+{% endblock %}
+
+{% block js %}
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="{% static 'js/save.js' %}"></script>
+{% endblock %}
