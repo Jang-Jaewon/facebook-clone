@@ -7,10 +7,14 @@ def bookmark_friends_list(request):
     username = request.user
     user = get_object_or_404(get_user_model(), username=username)
     user_profile = user.profile
+    friend_requests = user.requested_friend_requests.all()
+    friends = username.friends.all()
     post_list = Post.objects.all()
     context = {
         "user_profile": user_profile,
         "post_list": post_list,
+        "friend_requests": friend_requests,
+        "friends": friends,
     }
     return render(
         request,

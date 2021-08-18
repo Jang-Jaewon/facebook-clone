@@ -58,6 +58,22 @@
                 }
             })
         }
+        // 친구 요청 Ajax 통신
+        if (elem.matches('[data-name="friend_request"]')){
+            const user_id = elem.getAttribute('name');
+            $.ajax({
+                type: "POST",
+                url: "{% url 'accounts:create_friend_request' %}",
+                data: {
+                    'pk': user_id,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                },
+                dataType: "json",
+                success: function(response){
+                    elem.innerHTML = "친구요청중";
+                },
+            })
+        }
         elem.classList.toggle('active');
     }
 

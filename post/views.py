@@ -12,13 +12,27 @@ def post_list(request):
 
     if request.user.is_authenticated:
         username = request.user
+        friends = username.friends.all()
+        request_friends = username.friend_requests
         user = get_object_or_404(get_user_model(), username=username)
-        # print(user.profile)
         user_profile = user.profile
+        friend_list = user.friends.all()
+        my_friend_user_list = list(map(lambda friend: friend.user, friend_list))
+        friend_request_list = user.friend_requests.all()
+        my_friend_request_user_list = list(
+            map(lambda friend_request: friend_request.to_user, friend_request_list)
+        )
         return render(
             request,
             "post/post_list.html",
-            {"user_profile": user_profile, "posts": post_list},
+            {
+                "user_profile": user_profile,
+                "posts": post_list,
+                "friends": friends,
+                "request_friends": request_friends,
+                "my_friend_user_list": my_friend_user_list,
+                "my_friend_request_user_list": my_friend_request_user_list,
+            },
         )
     else:
         return render(

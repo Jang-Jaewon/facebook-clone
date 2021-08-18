@@ -1,6 +1,5 @@
 from django.db import models
-from django.conf import settings
-from django.db.models.deletion import CASCADE  # 👈 settgins.py
+from django.conf import settings  # 👈 settgins.py
 from imagekit.models import ProcessedImageField  # 👈 이미지 처리
 from imagekit.processors import ResizeToFill  # 👈 사이즈 변경
 import re  # 👈 정규표현식
@@ -40,3 +39,42 @@ class Profile(models.Model):
     )
 
     gender = models.CharField("성별(선택사항)", max_length=10, choices=GENDER_C, default="N")
+
+
+class Friend(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, blank=True, on_delete=models.CASCADE
+    )
+    # room = ForeignKey(Room, blank=True, on_delete=models.SET_NULL, null=True) # 채팅 관련 field
+    current_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name="friends",
+        blank=True,
+        on_delete=models.CASCADE,
+    )
+    created_at = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return self.user.username
+
+
+class FriendRequest(models.Model):
+    # 요청하는 사람
+    from_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name="friend_requests",
+        on_delete=models.CASCADE,
+    )
+    # 요청받는 사람
+    to_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name="requested_friend_requests",
+        on_delete=models.CASCADE,
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return "{} => {}".format(self.from_user, self.to_user)
+
+    class Meta:
+        unique_together = ("from_user", "to_user")

@@ -38,11 +38,78 @@
                     {% endfor %}
                 {% endfor %}
             </div>
+
+            <div id="friends" class="hidden">
+                {% for friend_request in friend_requests %}
+                <article class="contents">
+                    <div class="thumbnail"><img src="{{ friend_request.from_user.profile.picture.url }}" alt=""></div>
+                    <div class="right_contents">
+                        <h1 clsss="heading">{{ friend_request.from_user.username }}님이 친구요청을 보냈습니다 </h1>
+                        <div class="btn_container">
+                            <button class="agree" data-name="friend_accept" name="{{ friend_request.id }}">수락</button>
+                        </div>       
+                    </div>
+                </article>
+                {% endfor %}
+
+                {% for friend in friends %}
+                <article class="contents">
+                    <div class="thumbnail"><img src="{{ friend.user.profile.picture.url }}" alt=""></div>
+                    <div class="right_contents">
+                        <h1 clsss="heading">{{ friend.user }}님</h1>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+
         </section>
     </div>
 </div>
 
-<div id="side_box"></div>
+<div id="side_box">
+    <ul>
+        {% for friend in friends %}        
+            <li>
+                <div class="profile_img"><img src="{{ friend.user.profile.picture.url }}" alt=""></div>
+                <div class="name">{{ friend.user }}</div>
+                <div class="light"></div>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+
+<script>
+    const friends = document.querySelector('#contents_container')
+    function delegationFunc(e){
+        let elem = e.target
+        console.log(elem);
+        while (!elem.getAttribute('data-name')){
+            elem = elem.parentNode;
+            if (elem.nodeName == 'BODY'){
+                elem = null;
+                return;
+            }
+        }
+
+        if (elem.matches('[data-name="friend_accept"]')){
+            const request_id = elem.getAttribute('name');
+            $.ajax({
+                type: "POST",
+                url: "{% url 'accounts:accept_friend_request' %}",
+                data: {
+                    'pk': request_id,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                },
+                dataType: "json",
+                success: function(response){
+                    location.reload();
+                },
+            })
+        }
+    }
+    friends.addEventListener('click', delegationFunc);
+</script>
+
 {% endblock %}
 
 {% block js %}
