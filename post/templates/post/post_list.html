@@ -99,7 +99,7 @@
                         <div class="img_section"><img src="{{post.photo.url}}" alt=""></div>
                         <div class="ajax_field">
                             <div class="like">좋아요<span class="like_count" id="like-count-{{post.id}}">{{post.like_count}}</span>개</div>
-                            <div class="comment">댓글<span class="comment_count" id="comment_count-{{post.id}}">1</span>개</div>
+                            <div class="comment">댓글<span class="comment_count" id="comment-count-{{ post.id }}">{{ post.comment_set.count }}</span>개</div>
                         </div>
                         <div class="btn_container">
                         {% if user in post.like_user_set.all %}
@@ -109,19 +109,30 @@
                         {% endif %}
                             <div class="comment-btn"><span class="icon icon--cooment-line"></span>댓글</div>
                         </div>
+
                         <div class="comment_container">
                             <div class="comment" id="comment-list-ajax-post{{ post.id }}">
+                                {% for comment in post.comment_set.all %}
                                 <div class="comment-detail" id="comment{{ comment.id }}">
                                     <div class="id">
-                                        <div class="profile_img"><img src="{% static 'imgs/noun_User.png' %}" alt=""></div>
-                                        <div class="text_field">안녕하세요</div>
-                                        <div class="time">3시간전</div>
-                                        <input type="button" class="delete" data-name="comment_delete" value="X" name="{{ comment.id }}">                         
+                                        <div class="profile_img"><img src="{{ comment.author.profile.picture.url }}" alt=""></div>
+                                        <div class="comment_field">
+                                            <div class="text_container">
+                                                <div class="name">{{ comment.author.profile.nickname }}</div>
+                                                <div class="text_field">{{ comment.content }}</div>
+                                                <div class="time">{{ comment.created_at|timesince }}</div>
+                                            </div>
+                                        </div>
+                                        {% if user == comment.author %}
+                                        <input type="button" class="delete" data-name="comment_delete" value="X" name="{{ comment.id }}">
+                                        {% endif %}                                             
                                     </div>
                                 </div>
+                                {% endfor %}
                             </div>
                         </div>
-                        <div class="comment_input" id="add_comment-post{{post.id}}">
+
+                        <div class="comment_input" id="add-comment-post{{post.id}}">
                             {% if user.is_authenticated %}
                                 <div class="profile_img"><img src="{{ user_profile.picture.url }}" alt=""></div>
                                 <div class="input_container">
@@ -132,7 +143,7 @@
                                 </div>
 
                             {% else %}
-                              <div class="profile_img"><img src="{% static 'imgs/noun_User.png' %}" alt=""></div>
+                                <div class="profile_img"><img src="{% static 'imgs/noun_User.png' %}" alt=""></div>
                                 <div class="input_container">
                                     {{ comment_form }}
                                     <button class="send">

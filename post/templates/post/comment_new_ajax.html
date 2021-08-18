@@ -1,0 +1,15 @@
+<div class="comment-detail" id="comment{{ comment.id }}">
+    <div class="id">
+        <div class="profile_img"><img src="{{ comment.author.profile.picture.url }}" alt=""></div>
+        <div class="comment_field">
+            <div class="text_container">
+                <div class="name">{{ comment.author.profile.nickname }}</div>
+                <div class="text_field">{{ comment.content }}</div>
+                <div class="time">{{ comment.created_at|timesince }}</div>
+            </div>
+        </div>
+        {% if user == comment.author %}
+        <input type="button" class="delete" data-name="comment_delete" value="X" name="{{ comment.id }}">
+        {% endif %}
+    </div>
+</div>

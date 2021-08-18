@@ -74,9 +74,59 @@
                 },
             })
         }
+        // 댓글 생성 ajax 통신
+        if (elem.matches('[data-name="comment"]')){
+            console.log('새댓글')
+            const pk = elem.getAttribute('name'); // pk값 가져오기
+            const content = document.querySelector('#add-comment-post'+pk+'>div>input[type=text]').value; // 댓글 내용 가져오기
+            if(content.length > 140) {
+                alert("댓글은 최대 140자 입력 가능하빈다. 현재 글자수: "+ content.length);
+                return;
+            }
+            if(content.length == 0) {
+                alert("글자를 입력해 주세요: "+ content.length);
+                return;
+            }
+            $.ajax({
+                type: "POST",
+                url: "{% url 'post:comment_new' %}",
+                data: {
+                    'pk': pk,
+                    'content': content,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                },
+                dataType: "html",
+                success: function(data, textStatus, jqXHR){
+                    document.querySelector("#comment-list-ajax-post"+pk).insertAdjacentHTML("afterbegin", data);
+                    location.reload();
+                }
+            })
+        }
+        // 댓글 삭제 ajax 통신
+        if (elem.matches('[data-name="comment_delete"]')){
+            console.log('삭제')
+            const pk = elem.getAttribute('name');
+
+            $.ajax({
+                type: "POST",
+                url: "{% url 'post:comment_delete' %}",
+                data: {
+                    'pk': pk,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}',
+                },
+                dataType: "json",
+                success: function(response){
+                    console.log('성공')
+                    if(response.status){
+                        document.querySelector('#comment'+pk).remove();
+                        location.reload();
+                    }
+                }
+            })
+
+        }
         elem.classList.toggle('active');
     }
-
     delegation.addEventListener('click', delegationFunc); // 👈 '#contents_container'가 클릭됬을 때, delegationFunc실행
 })();
 </script> 
