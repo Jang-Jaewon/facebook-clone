@@ -1,15 +1,31 @@
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth import get_user_model
 from .models import *
-from .forms import *
+from .forms import CommentForm, PostForm
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 import json
+from django.contrib import messages
+from django.db.models import Count  # 👈 'Count' import
 
 # Create your views here.
-def post_list(request):
-    post_list = Post.objects.all()
+def post_list(request, tag=None):  # 👈 tag가 url을 통해 전달되지 않을때는 None값 할당
+    tag_all = Tag.objects.annotate(num_post=Count("post")).order_by(
+        "-num_post"
+    )  # 👈 모든 태그를 정렬하여 가져옵니다.
+    if tag:
+        post_list = Post.objects.filter(
+            tag_set__name__iexact=tag
+        )  # 👈 Tag의 이름과 정확히 일치하는 Post를 가져옵니다
+    else:
+        post_list = Post.objects.all()  # 👈 argument로 들어온 tag가 없다면, 모두를 출력
+    if request.method == "POST":
+        tag = request.POST.get("tag")
+        tag_clean = "".join(e for e in tag if e.isalnum())  # 👈 숫자나 문자열로 들어왔을 때, 작동
+        return redirect("post:post_search", tag_clean)
+
+    # post_list = Post.objects.all() # 👈 삭제
     comment_form = CommentForm()
 
     if request.user.is_authenticated:
@@ -28,6 +44,8 @@ def post_list(request):
             request,
             "post/post_list.html",
             {
+                "tag": tag,
+                "tag_all": tag_all,
                 "user_profile": user_profile,
                 "posts": post_list,
                 "friends": friends,
@@ -42,6 +60,8 @@ def post_list(request):
             request,
             "post/post_list.html",
             {
+                "tag": tag,
+                "tag_all": tag_all,
                 "posts": post_list,
                 "comment_form": comment_form,
             },
@@ -86,6 +106,61 @@ def post_bookmark(request):
     context = {"is_bookmarked": is_bookmarked, "message": message}
 
     return HttpResponse(json.dumps(context), content_type="application/json")
+
+
+@login_required
+def post_new(request):
+    if request.method == "POST":
+        form = PostForm(request.POST, request.FILES)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = request.user
+            post.save()
+            post.tag_save()
+            messages.info(request, "새 글이 등록되었습니다")
+            return redirect("post:post_list")
+    else:
+        form = PostForm()
+    return redirect("post:post_list")
+
+
+@login_required
+def post_edit(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    if post.author != request.user:
+        messages.warning(request, "잘못된 접근입니다")
+        return redirect("post:post_list")
+
+    if request.method == "POST":
+        form = PostForm(request.POST, request.FILES, instance=post)
+        if form.is_valid():
+            post = form.save()
+            post.tag_set.clear()
+            post.tag_save()
+            messages.success(request, "수정완료")
+            return redirect("post:post_list")
+    else:
+        form = PostForm(instance=post)
+    return render(
+        request,
+        "post/post_edit.html",
+        {
+            "post": post,
+            "form": form,
+        },
+    )
+
+
+@login_required
+def post_delete(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    if post.author != request.user or request.method == "GET":
+        messages.warning(request, "잘못된 접근입니다")
+        return redirect("post:post_list")
+
+    if request.method == "POST":
+        post.delete()
+        return redirect("post:post_list")
 
 
 @login_required

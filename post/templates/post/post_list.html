@@ -1,5 +1,6 @@
 {% extends 'layout.html' %}
 {% load static %}
+{% load post_extras %}
 
 {% block head %}
 <link rel="stylesheet" href="{% static 'css/main.css' %}">
@@ -48,7 +49,7 @@
                             </p>
                         </div>
                         <div class="middle">
-                            <canvas id="imgeCanvas" width="0" height="0"></canvas>
+                            <canvas id="imageCanvas" width="0" height="0"></canvas>
                         </div>
                         <div class="bottom">
                             <input type="file" name="photo" id="id_photo" required>
@@ -88,13 +89,21 @@
                                     {% else %}
                                         <li><button class="friend_request" data-name="friend_request" name="{{ post.author.profile.user.id }}">친구요청하기</button></li>
                                     {% endif %}
-                                        
+                                    {% if post.author == user %}
+                                        <li><a href="{% url 'post:post_edit' post.pk %}">수정</a></li>
+                                        <li>
+                                            <form action="{% url 'post:post_delete' post.pk %}" method="post">
+                                                {% csrf_token %}
+                                                <input type="submit" class="post-delete" value="삭제">
+                                            </form>                                            
+                                        </li>
+                                        {% endif %}    
                                     </ul>
                                 </div>
                             </div>
                         </header>
                         <div class="main_article">
-                            {{post.content}}
+                            {{ post|add_link|safe|linebreaksbr }}
                         </div>
                         <div class="img_section"><img src="{{post.photo.url}}" alt=""></div>
                         <div class="ajax_field">

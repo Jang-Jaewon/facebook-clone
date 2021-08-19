@@ -116,7 +116,6 @@
                 },
                 dataType: "json",
                 success: function(response){
-                    console.log('성공')
                     if(response.status){
                         document.querySelector('#comment'+pk).remove();
                         location.reload();
@@ -125,8 +124,15 @@
             })
 
         }
+        // 게시물 생성창 크기 조절 ajax
+        if(elem.matches('[data-name="add"]')){
+            console.log('글추가')
+            textField.style.height = '100px';
+            submit.disabled = false;
+            submit.parentNode.style.display = 'block';
+        }
         elem.classList.toggle('active');
-    }
+    };
     delegation.addEventListener('click', delegationFunc); // 👈 '#contents_container'가 클릭됬을 때, delegationFunc실행
 })();
 </script> 

@@ -30,6 +30,7 @@ class Post(models.Model):
     content = models.CharField(max_length=140, help_text="최대 140자 입력 가능")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    tag_set = models.ManyToManyField("Tag", blank=True)
     like_user_set = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         blank=True,
@@ -46,6 +47,15 @@ class Post(models.Model):
     class Meta:
         ordering = ["-created_at"]  # 👈 생성된 날짜 역순으로 정렬
 
+    # HashTga 단어 찾는 매서드
+    def tag_save(self):
+        tags = re.findall(r"#(\w+)\b", self.content)
+        if not tags:
+            return
+        for t in tags:
+            tag, tag_created = Tag.objects.get_or_create(name=t)
+            self.tag_set.add(tag)
+
     @property
     def like_count(self):
         return self.like_user_set.count()
@@ -56,6 +66,13 @@ class Post(models.Model):
 
     def __str__(self):
         return self.content
+
+
+class Tag(models.Model):
+    name = models.CharField(max_length=140, unique=True)
+
+    def __str__(self):
+        return self.name
 
 
 class Like(models.Model):
