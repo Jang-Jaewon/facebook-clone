@@ -8,6 +8,8 @@ from django.http import HttpResponse
 import json
 from django.contrib import messages
 from django.db.models import Count  # 👈 'Count' import
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+
 
 # Create your views here.
 def post_list(request, tag=None):  # 👈 tag가 url을 통해 전달되지 않을때는 None값 할당
@@ -25,8 +27,27 @@ def post_list(request, tag=None):  # 👈 tag가 url을 통해 전달되지 않�
         tag_clean = "".join(e for e in tag if e.isalnum())  # 👈 숫자나 문자열로 들어왔을 때, 작동
         return redirect("post:post_search", tag_clean)
 
-    # post_list = Post.objects.all() # 👈 삭제
     comment_form = CommentForm()
+
+    # Paginaion
+    paginator = Paginator(post_list, 3)
+    page_num = request.POST.get("page")
+    try:
+        posts = paginator.page(page_num)
+    except PageNotAnInteger:
+        posts = paginator.page(1)
+    except EmptyPage:
+        posts = paginator.page(paginator.num_pages)
+
+    if request.is_ajax():
+        return render(
+            request,
+            "post/post_list_ajax.html",
+            {
+                "posts": posts,
+                "comment_form": comment_form,
+            },
+        )
 
     if request.user.is_authenticated:
         username = request.user

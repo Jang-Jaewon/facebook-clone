@@ -133,6 +133,47 @@
         }
         elem.classList.toggle('active');
     };
+
+    function scrollfunc(){
+        const scrollHeight = pageYOffset + window.innerHeight;
+        const documentHeight = document.body.scrollHeight;
+
+        if(scrollHeight >= documentHeight){
+            const page = document.querySelector('#page').value;
+            // console.log(page);
+            const end_page = {{posts.paginator.num_pages}}
+            if (page > end_page){
+                return;
+            }
+            document.querySelector('#page').value = parseInt(page) + 1;
+            callMorePostAjax(page);
+        }
+    }
+    
+    function callMorePostAjax(page){
+        const end_page = {{posts.paginator.num_pages}};
+        if (page > end_page){
+            return;
+        }
+        $.ajax({
+            type : "POST",
+            url : "{% url 'post:post_list' %}",
+            data : {
+                'page' : page,
+                'csrfmiddlewaretoken' : "{{csrf_token}}",
+            },
+            dataType : 'html',
+            success : addMorePostAjax,
+        })
+    }
+
+    function addMorePostAjax(data, textStatus, jqXHR){
+        let post = document.querySelector('#post_list_ajax');
+        post.insertAdjacentHTML("beforeend", data);
+    }
+
+
+    window.addEventListener('scroll', scrollfunc);
     delegation.addEventListener('click', delegationFunc); // 👈 '#contents_container'가 클릭됬을 때, delegationFunc실행
 })();
 </script> 
